@@ -6,15 +6,24 @@ on:
     - cron: "0 10 * * 1"
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  REGISTRY: "ghcr.io"
+  IMAGE_NAME: "${{ github.repository }}"
+  JDK_VERSION: "19"
 
 jobs:
-  build-image:
+  build-images:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
+
+    strategy:
+      matrix:
+        include:
+          - target: base
+            tag: 19
+          - target: magick
+            tag: 19-magick
 
     steps:
       - name: Checkout repository
@@ -39,9 +48,9 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=sha,event=push,enable=true,prefix={{ branch }}-git-,format=short
-            type=raw,event=push,enable={{ is_default_branch }},value={{ branch }}
-            type=raw,event=push,enable={{ is_default_branch }},value=19
+            type=sha,event=push,enable=true,prefix=branch-{{ branch }}-${{ matrix.tag }}-git-,format=short
+            type=raw,event=push,enable={{ is_default_branch }},value={{ branch }}-${{ matrix.tag }}
+            type=raw,event=push,enable={{ is_default_branch }},value=${{ matrix.tag }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
@@ -50,3 +59,4 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          target: ${{ matrix.target }}

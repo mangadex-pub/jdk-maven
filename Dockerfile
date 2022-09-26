@@ -1,5 +1,5 @@
 ARG JDK_VERSION="19"
-FROM docker.io/library/amazoncorretto:${JDK_VERSION}
+FROM docker.io/library/amazoncorretto:${JDK_VERSION} as base
 
 USER root
 RUN yum install -y  \
@@ -31,3 +31,15 @@ ENV MAVEN_CONFIG "/home/mangadex/.m2"
 
 WORKDIR /tmp
 RUN mkdir -pv "$MAVEN_CONFIG" && mvn -v
+
+FROM base as magick
+
+USER root
+RUN yum install -y  \
+      ImageMagick \
+  && rm -rf /var/cache/yum/* \
+  && yum clean all
+
+USER mangadex
+RUN identify --version | grep -Pz 'ImageMagick 6'
+RUN convert --version | grep -Pz 'ImageMagick 6'

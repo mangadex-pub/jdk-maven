@@ -28,6 +28,6 @@ RUN groupadd -r -g 999 mangadex && \
 
 USER mangadex
 ENV MAVEN_CONFIG "/home/mangadex/.m2"
-RUN mkdir -pv "$MAVEN_CONFIG"
 
 WORKDIR /tmp
+RUN mkdir -pv "$MAVEN_CONFIG" && mvn -v

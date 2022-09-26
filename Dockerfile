@@ -40,6 +40,12 @@ RUN yum install -y  \
   && rm -rf /var/cache/yum/* \
   && yum clean all
 
+ARG OXIPNG_VERSION="6.0.1"
+RUN curl -sfSL -o "oxipng.tar.gz" "https://github.com/shssoichiro/oxipng/releases/download/v${OXIPNG_VERSION}/oxipng-6.0.1-x86_64-unknown-linux-musl.tar.gz" && \
+    mkdir oxipng && tar -C oxipng --strip-components=1 -xf "oxipng.tar.gz" && \
+    mv -fv oxipng/oxipng /bin/oxipng
+
 USER mangadex
 RUN identify --version | grep -Pz 'ImageMagick 6'
 RUN convert --version | grep -Pz 'ImageMagick 6'
+RUN oxipng --version

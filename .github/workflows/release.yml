@@ -10,7 +10,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  build-test-push:
+  build-image:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -38,6 +38,10 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,event=push,enable=true,prefix={{ branch }}-git-,format=short
+            type=raw,event=push,enable={{ is_default_branch }},value={{ branch }}
+            type=raw,event=push,enable={{ is_default_branch }},value=19
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v3

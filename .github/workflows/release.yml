@@ -20,10 +20,14 @@ jobs:
     strategy:
       matrix:
         include:
-          - target: base
-            tag: 19
+          - target: corretto
+            tag: 19-corretto
           - target: magick
             tag: 19-magick
+          - target: playwright
+            tag: 19-playwright
+          - target: temurin
+            tag: 19-temurin
 
     steps:
       - name: Checkout repository

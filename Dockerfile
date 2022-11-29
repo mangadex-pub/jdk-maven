@@ -26,7 +26,6 @@ USER root
 RUN apt -qq update && \
     apt -qq -y full-upgrade && \
     apt -qq -y install --no-install-recommends curl gzip tar wget && \
-    apt -qq -y --no-install-recommends install nginx && \
     apt -qq -y --purge autoremove && \
     apt -qq -y clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/cache/* /var/log/*
@@ -68,8 +67,8 @@ USER root
 RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
     apt -qq -y install --no-install-recommends nodejs && \
     mkdir -pv "$PLAYWRIGHT_BROWSERS_PATH" && \
-    npx --yes playwright@1.27.1 install chromium && \
-    npx --yes playwright@1.27.1 install-deps chromium && \
+    npx --yes playwright@1.28.1 install chromium && \
+    npx --yes playwright@1.28.1 install-deps chromium && \
     apt -qq -y autoremove --purge nodejs lsb-release gnupg && \
     rm -rf /root/.npm && \
     apt -qq -y --purge autoremove && \

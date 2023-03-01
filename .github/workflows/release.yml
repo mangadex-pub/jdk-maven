@@ -33,7 +33,7 @@ jobs:
             tag: 19-magick
           - target: playwright
             jdk_version: 19
-            tag: 19-playwright
+            tag: 19-playwright-1.31
           - target: temurin
             jdk_version: 19
             tag: 19-temurin

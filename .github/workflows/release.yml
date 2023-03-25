@@ -20,11 +20,11 @@ jobs:
       matrix:
         include:
           - target: corretto
-            jdk_version: 19
-            tag: 19-corretto
+            jdk_version: 20
+            tag: 20-corretto
           - target: magick
-            jdk_version: 19
-            tag: 19-magick
+            jdk_version: 20
+            tag: 20-magick
           - target: playwright
             jdk_version: 19
             tag: 19-playwright-1.31

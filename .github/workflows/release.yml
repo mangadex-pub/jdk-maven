@@ -20,12 +20,6 @@ jobs:
       matrix:
         include:
           - target: corretto
-            jdk_version: 11
-            tag: 11-corretto
-          - target: corretto
-            jdk_version: 17
-            tag: 17-corretto
-          - target: corretto
             jdk_version: 19
             tag: 19-corretto
           - target: magick

@@ -26,11 +26,11 @@ jobs:
             jdk_version: 20
             tag: 20-magick
           - target: playwright
-            jdk_version: 19
-            tag: 19-playwright-1.31
+            jdk_version: 20
+            tag: 20-playwright-1.32
           - target: temurin
-            jdk_version: 19
-            tag: 19-temurin
+            jdk_version: 20
+            tag: 20-temurin
 
     steps:
       - name: Checkout repository

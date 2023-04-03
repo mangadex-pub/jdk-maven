@@ -1,4 +1,4 @@
-ARG JDK_VERSION="19"
+ARG JDK_VERSION="20"
 FROM docker.io/library/amazoncorretto:${JDK_VERSION} as corretto
 
 USER root
@@ -15,7 +15,7 @@ USER mangadex
 WORKDIR /tmp
 RUN mkdir -pv "$HOME/.m2" && mvn -v
 
-ARG JDK_VERSION="19"
+ARG JDK_VERSION="20"
 FROM docker.io/library/eclipse-temurin:${JDK_VERSION}-jammy as temurin
 
 ENV DEBIAN_FRONTEND "noninteractive"
@@ -67,8 +67,8 @@ USER root
 RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
     apt -qq -y install --no-install-recommends nodejs && \
     mkdir -pv "$PLAYWRIGHT_BROWSERS_PATH" && \
-    npx --yes playwright@^1.31 install chromium && \
-    npx --yes playwright@^1.31 install-deps chromium && \
+    npx --yes playwright@^1.32 install chromium && \
+    npx --yes playwright@^1.32 install-deps chromium && \
     apt -qq -y autoremove --purge nodejs lsb-release gnupg && \
     rm -rf /root/.npm && \
     apt -qq -y --purge autoremove && \

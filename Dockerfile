@@ -46,6 +46,7 @@ FROM corretto as magick
 USER root
 RUN yum install -y  \
       ImageMagick \
+      libjpeg-turbo-utils \
   && rm -rf /var/cache/yum/* \
   && yum clean all
 
@@ -58,6 +59,7 @@ USER mangadex
 RUN identify --version | grep -Pz 'ImageMagick 6'
 RUN convert --version | grep -Pz 'ImageMagick 6'
 RUN oxipng --version
+RUN jpegtran -version
 
 FROM temurin as playwright
 

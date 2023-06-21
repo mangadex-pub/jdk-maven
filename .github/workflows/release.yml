@@ -27,7 +27,7 @@ jobs:
             tag: 20-magick
           - target: playwright
             jdk_version: 20
-            tag: 20-playwright-1.33
+            tag: 20-playwright-1.35
           - target: temurin
             jdk_version: 20
             tag: 20-temurin

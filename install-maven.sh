@@ -2,8 +2,8 @@
 
 set -euo pipefail
 
-export MAVEN_VERSION="3.9.1"
-export MAVEN_TARBALL_SHA="d3be5956712d1c2cf7a6e4c3a2db1841aa971c6097c7a67f59493a5873ccf8c8b889cf988e4e9801390a2b1ae5a0669de07673acb090a083232dbd3faf82f3e3"
+export MAVEN_VERSION="3.9.2"
+export MAVEN_TARBALL_SHA="900bdeeeae550d2d2b3920fe0e00e41b0069f32c019d566465015bdd1b3866395cbe016e22d95d25d51d3a5e614af2c83ec9b282d73309f644859bbad08b63db"
 export MAVEN_TARBALL_BASEURL="https://dlcdn.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries"
 
 MAVEN_INSTALL_DIR="${1:-"/usr/share/maven"}"

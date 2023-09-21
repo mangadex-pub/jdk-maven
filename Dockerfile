@@ -69,8 +69,8 @@ USER root
 RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
     apt -qq -y install --no-install-recommends nodejs && \
     mkdir -pv "$PLAYWRIGHT_BROWSERS_PATH" && \
-    npx --yes playwright@^1.35 install chromium && \
-    npx --yes playwright@^1.35 install-deps chromium && \
+    npx --yes playwright@^1.38 install chromium && \
+    npx --yes playwright@^1.38 install-deps chromium && \
     apt -qq -y autoremove --purge nodejs lsb-release gnupg && \
     rm -rf /root/.npm && \
     apt -qq -y --purge autoremove && \

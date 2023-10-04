@@ -1,84 +1,108 @@
-ARG JDK_VERSION="20"
-FROM docker.io/library/amazoncorretto:${JDK_VERSION} as corretto
+ARG JDK_VERSION="21"
+FROM docker.io/library/amazoncorretto:${JDK_VERSION}-al2023 as upstream
 
 USER root
-RUN yum install -y curl gzip shadow-utils tar which wget \
-  && rm -rf /var/cache/yum/* \
-  && yum clean all
 
-COPY install-maven.sh /install-maven.sh
-RUN /install-maven.sh
+FROM upstream as base
 
-RUN groupadd -r -g 999 mangadex && useradd -m -u 999 -r -g 999 mangadex
+RUN yum update && \
+    yum install --allowerasing -y \
+      curl \
+      fontconfig \
+      gzip \
+      shadow-utils \
+      tar \
+      util-linux \
+      wget \
+      which && \
+    rm -rf /var/cache/yum/* && \
+    yum clean all && \
+    rm -rf /var/log/*.log
+
+COPY install-maven.sh /tmp/install-maven.sh
+RUN chmod -v +x /tmp/install-maven.sh && /tmp/install-maven.sh && rm -v /tmp/install-maven.sh
+
+RUN groupadd -r -g 9999 mangadex && useradd -m -u 9999 -g 9999 mangadex
 USER mangadex
 
-WORKDIR /tmp
-RUN mkdir -pv "$HOME/.m2" && mvn -v
-
-ARG JDK_VERSION="20"
-FROM docker.io/library/eclipse-temurin:${JDK_VERSION}-jammy as temurin
-
-ENV DEBIAN_FRONTEND "noninteractive"
-ENV TZ "UTC"
-RUN echo 'Dpkg::Progress-Fancy "0";' > /etc/apt/apt.conf.d/99progressbar
+RUN java -version
+RUN mkdir "$HOME/.m2" && mvn -v
 
 USER root
-RUN apt -qq update && \
-    apt -qq -y full-upgrade && \
-    apt -qq -y install --no-install-recommends curl gzip tar wget && \
-    apt -qq -y --purge autoremove && \
-    apt -qq -y clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/cache/* /var/log/*
 
-COPY install-maven.sh /install-maven.sh
-RUN /install-maven.sh
+FROM base as gifsicle
 
-RUN groupadd -r -g 999 mangadex && useradd -m -u 999 -r -g 999 mangadex
+RUN yum update && yum groupinstall -y "Development Tools"
+COPY install-gifsicle.sh /tmp/install-gifsicle.sh
+RUN chmod -v +x /tmp/install-gifsicle.sh && /tmp/install-gifsicle.sh
+RUN ldd /opt/bin/gifsicle && /opt/bin/gifsicle --version
 
-ENTRYPOINT /bin/bash
-USER mangadex
-
-WORKDIR /tmp
-RUN mkdir -pv "$HOME/.m2" && mvn -v
-
-FROM corretto as magick
-
-USER root
-RUN yum install -y  \
-      ImageMagick \
-      libjpeg-turbo-utils \
-  && rm -rf /var/cache/yum/* \
-  && yum clean all
+FROM base as oxipng
 
 ARG OXIPNG_VERSION="8.0.0-mangadex-1"
 RUN curl -sfSL -o "oxipng.tar.gz" "https://github.com/mangadex-pub/oxipng/releases/download/v${OXIPNG_VERSION}/oxipng-${OXIPNG_VERSION}-x86_64-unknown-linux-musl.tar.gz" && \
     mkdir oxipng && tar -C oxipng --strip-components=1 -xf "oxipng.tar.gz" && \
     mv -fv oxipng/oxipng /bin/oxipng
+RUN oxipng --version
+
+FROM base as magick
+
+COPY --from=gifsicle /opt/bin/gifsicle /bin/gifsicle
+COPY --from=oxipng /bin/oxipng /bin/oxipng
+
+RUN yum install -y  \
+      ImageMagick \
+      libjpeg-turbo-utils && \
+    rm -rf /var/cache/yum/* && \
+    yum clean all && \
+    rm -rf /var/log/*.log
 
 USER mangadex
-RUN identify --version | grep -Pz 'ImageMagick 6'
-RUN convert --version | grep -Pz 'ImageMagick 6'
-RUN oxipng --version
+RUN convert --version
+RUN identify --version
+RUN gifsicle --version
 RUN jpegtran -version
+RUN oxipng --version
+RUN fc-cache -rf
 
-FROM temurin as playwright
+USER mangadex
+WORKDIR /tmp
+
+FROM base as playwright
 
 ENV PLAYWRIGHT_BROWSERS_PATH /ms-playwright
 
+ARG PLAYWRIGHT_VERSION="1.38"
+ENV PLAYWRIGHT_VERSION="${PLAYWRIGHT_VERSION}"
+
 USER root
-RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
-    apt -qq -y install --no-install-recommends nodejs && \
+
+RUN yum update && \
+    yum install -y https://rpm.nodesource.com/pub_18.x/nodistro/repo/nodesource-release-nodistro-1.noarch.rpm && \
+    yum install nodejs -y --setopt=nodesource-nodejs.module_hotfixes=1 && \
+    npm install -g npm && \
     mkdir -pv "$PLAYWRIGHT_BROWSERS_PATH" && \
-    npx --yes playwright@^1.38 install chromium && \
-    npx --yes playwright@^1.38 install-deps chromium && \
-    apt -qq -y autoremove --purge nodejs lsb-release gnupg && \
-    rm -rf /root/.npm && \
-    apt -qq -y --purge autoremove && \
-    apt -qq -y clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/cache/* /var/log/* && \
+    npx --yes playwright@^${PLAYWRIGHT_VERSION} install chromium && \
     rm -rf $PLAYWRIGHT_BROWSERS_PATH/ffmpeg* && \
     rm -rf $PLAYWRIGHT_BROWSERS_PATH/firefox* && \
     rm -rf $PLAYWRIGHT_BROWSERS_PATH/webkit* && \
-    true
+    yum install -y \
+      at-spi2-atk \
+      at-spi2-core \
+      atk \
+      cups-client \
+      libXcomposite \
+      libXdamage \
+      libXfixes \
+      mesa-libgbm \
+      nss \
+      pango && \
+    yum autoremove -y nodejs && \
+    rm -rf /var/cache/yum/* && \
+    yum clean all && \
+    rm -rf /var/log/*.log
+
+RUN fc-cache -rf
 
 USER mangadex
+WORKDIR /tmp

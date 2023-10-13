@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-GIFSICLE_VERSION="1.94"
+GIFSICLE_VERSION="$1"
 GIFSICLE_PREFIX="/opt"
 
 echo "Cloning gifsicle sources"

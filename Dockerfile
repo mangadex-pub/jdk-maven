@@ -34,22 +34,37 @@ FROM base as gifsicle
 
 RUN yum update && yum groupinstall -y "Development Tools"
 COPY install-gifsicle.sh /tmp/install-gifsicle.sh
-RUN chmod -v +x /tmp/install-gifsicle.sh && /tmp/install-gifsicle.sh
+
+ARG GIFSICLE_VERSION="1.94"
+RUN chmod -v +x /tmp/install-gifsicle.sh && /tmp/install-gifsicle.sh "${GIFSICLE_VERSION}"
 RUN ldd /opt/bin/gifsicle && /opt/bin/gifsicle --version
 
-FROM base as oxipng
+FROM rust:1-alpine as oxipng
+
+RUN rustup update && rustup install stable
+RUN apk add --update alpine-sdk
 
 ARG OXIPNG_VERSION="9.0.0"
-RUN curl -sfSL -o "oxipng.tar.gz" "https://github.com/shssoichiro/oxipng/releases/download/v${OXIPNG_VERSION}/oxipng-${OXIPNG_VERSION}-x86_64-unknown-linux-musl.tar.gz" && \
-    mkdir oxipng && tar -C oxipng --strip-components=1 -xf "oxipng.tar.gz" && \
-    chmod -v +x oxipng/oxipng && \
-    mv -fv oxipng/oxipng /bin/oxipng
+RUN cargo install --features=binary oxipng@9.0.0
 RUN oxipng --version
+
+FROM base as exiftool
+
+WORKDIR /build
+
+RUN yum install -y libX11-devel perl-CPAN
+
+ENV PERL_MM_USE_DEFAULT "1"
+RUN cpan fforce install CPAN::DistnameInfo
+RUN cpan fforce install pp && pp --version
+RUN cpan install Image::ExifTool && exiftool -ver
+RUN pp -S -o exiftool $(which exiftool) && ./exiftool -ver
 
 FROM base as magick
 
-COPY --from=gifsicle /opt/bin/gifsicle /bin/gifsicle
-COPY --from=oxipng /bin/oxipng /bin/oxipng
+COPY --from=exiftool  /build/exiftool             /bin/exiftool
+COPY --from=gifsicle  /opt/bin/gifsicle           /bin/gifsicle
+COPY --from=oxipng    /usr/local/cargo/bin/oxipng /bin/oxipng
 
 RUN yum install -y  \
       ImageMagick \
@@ -60,6 +75,7 @@ RUN yum install -y  \
 
 USER mangadex
 RUN convert --version
+RUN exiftool -ver
 RUN identify --version
 RUN gifsicle --version
 RUN jpegtran -version

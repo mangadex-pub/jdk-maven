@@ -52,7 +52,7 @@ FROM base as exiftool
 
 WORKDIR /build
 
-RUN yum install -y libX11-devel perl-CPAN
+RUN yum install -y libX11-devel perl-CPAN perl-Tk
 
 ENV PERL_MM_USE_DEFAULT "1"
 RUN cpan fforce install CPAN::DistnameInfo

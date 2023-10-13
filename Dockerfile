@@ -39,9 +39,10 @@ RUN ldd /opt/bin/gifsicle && /opt/bin/gifsicle --version
 
 FROM base as oxipng
 
-ARG OXIPNG_VERSION="8.0.0-mangadex-1"
-RUN curl -sfSL -o "oxipng.tar.gz" "https://github.com/mangadex-pub/oxipng/releases/download/v${OXIPNG_VERSION}/oxipng-${OXIPNG_VERSION}-x86_64-unknown-linux-musl.tar.gz" && \
+ARG OXIPNG_VERSION="9.0.0"
+RUN curl -sfSL -o "oxipng.tar.gz" "https://github.com/shssoichiro/oxipng/releases/download/v${OXIPNG_VERSION}/oxipng-${OXIPNG_VERSION}-x86_64-unknown-linux-musl.tar.gz" && \
     mkdir oxipng && tar -C oxipng --strip-components=1 -xf "oxipng.tar.gz" && \
+    chmod -v +x oxipng/oxipng && \
     mv -fv oxipng/oxipng /bin/oxipng
 RUN oxipng --version
 

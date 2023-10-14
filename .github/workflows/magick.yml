@@ -49,6 +49,7 @@ jobs:
           context: .
           push: true
           platforms: ${{ matrix.platform }}
+          provenance: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           target: magick

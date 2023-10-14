@@ -26,7 +26,7 @@ RUN groupadd -r -g 9999 mangadex && useradd -m -u 9999 -g 9999 mangadex
 USER mangadex
 
 RUN java -version
-RUN mkdir "$HOME/.m2" && mvn -v
+RUN mkdir -v "~/.m2" && mvn -v
 
 USER root
 
@@ -55,10 +55,11 @@ WORKDIR /build
 RUN yum install -y libX11-devel perl-CPAN perl-Tk
 
 ENV PERL_MM_USE_DEFAULT "1"
-RUN cpan fforce install CPAN::DistnameInfo
-RUN cpan fforce install pp && pp --version
-RUN cpan install Image::ExifTool && exiftool -ver
-RUN pp -S -o exiftool $(which exiftool) && ./exiftool -ver
+RUN cpan install App::cpanminus
+RUN cpanm install CPAN::DistnameInfo HTTP::Date
+RUN cpanm install pp && pp --version
+RUN cpanm install Image::ExifTool && exiftool -ver
+RUN pp -S -c -o exiftool $(which exiftool) && ./exiftool -ver
 
 FROM base as magick
 

@@ -26,7 +26,7 @@ RUN groupadd -r -g 9999 mangadex && useradd -m -u 9999 -g 9999 mangadex
 USER mangadex
 
 RUN java -version
-RUN mkdir -v "~/.m2" && mvn -v
+RUN mkdir "$HOME/.m2" && mvn -v
 
 USER root
 

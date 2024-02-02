@@ -96,7 +96,7 @@ ENV PLAYWRIGHT_VERSION="${PLAYWRIGHT_VERSION}"
 USER root
 
 RUN yum update && \
-    yum install -y https://rpm.nodesource.com/pub_18.x/nodistro/repo/nodesource-release-nodistro-1.noarch.rpm && \
+    yum install -y https://rpm.nodesource.com/pub_20.x/nodistro/repo/nodesource-release-nodistro-1.noarch.rpm && \
     yum install nodejs -y --setopt=nodesource-nodejs.module_hotfixes=1 && \
     npm install -g npm && \
     mkdir -pv "$PLAYWRIGHT_BROWSERS_PATH" && \

@@ -125,13 +125,6 @@ RUN curl -fsSL -o setup_node.sh https://rpm.nodesource.com/setup_20.x && \
     chmod +x setup_node.sh && \
     ./setup_node.sh && \
     rm -v setup_node.sh && \
-    yum install nodejs -y && \
-    npm install -g npm && \
-    mkdir -pv "$PLAYWRIGHT_BROWSERS_PATH" && \
-    npx --yes playwright@^${PLAYWRIGHT_VERSION} install chromium && \
-    rm -rf $PLAYWRIGHT_BROWSERS_PATH/ffmpeg* && \
-    rm -rf $PLAYWRIGHT_BROWSERS_PATH/firefox* && \
-    rm -rf $PLAYWRIGHT_BROWSERS_PATH/webkit* && \
     yum install -y \
       at-spi2-atk \
       at-spi2-core \
@@ -141,8 +134,15 @@ RUN curl -fsSL -o setup_node.sh https://rpm.nodesource.com/setup_20.x && \
       libXdamage \
       libXfixes \
       mesa-libgbm \
+      nodejs \
       nss \
       pango && \
+    npm install -g npm && \
+    mkdir -pv "$PLAYWRIGHT_BROWSERS_PATH" && \
+    npx --yes playwright@^${PLAYWRIGHT_VERSION} install chromium && \
+    rm -rf $PLAYWRIGHT_BROWSERS_PATH/ffmpeg* && \
+    rm -rf $PLAYWRIGHT_BROWSERS_PATH/firefox* && \
+    rm -rf $PLAYWRIGHT_BROWSERS_PATH/webkit* && \
     yum autoremove -y nodejs && \
     rm -rf /var/cache/yum/* && \
     yum clean all && \

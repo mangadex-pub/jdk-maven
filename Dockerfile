@@ -7,7 +7,9 @@ FROM upstream as base
 
 RUN yum update && \
     yum install --allowerasing -y \
+      brotli \
       curl \
+      expat \
       fontconfig \
       gzip \
       shadow-utils \
@@ -61,11 +63,34 @@ RUN cpanm install pp && pp --version
 RUN cpanm install Image::ExifTool && exiftool -ver
 RUN pp -S -c -o exiftool $(which exiftool) && ./exiftool -ver
 
+FROM base as exiv2
+
+WORKDIR /build
+
+RUN yum groupinstall -y 'Development Tools'
+RUN yum install -y \
+      brotli-devel \
+      cmake \
+      expat-devel
+
+ARG EXIV2_VERSION="0.28.2"
+RUN git clone --depth=1 --branch="v${EXIV2_VERSION}" https://github.com/Exiv2/exiv2.git "exiv2"
+WORKDIR /build/exiv2
+
+RUN cmake -S . -B build \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DBUILD_SHARED_LIBS=OFF \
+      -DEXIV2_ENABLE_INIH=OFF
+RUN cmake --build build -j $(nproc)
+
+RUN build/bin/exiv2 --version && ldd build/bin/exiv2
+
 FROM base as magick
 
-COPY --from=exiftool  /build/exiftool             /bin/exiftool
-COPY --from=gifsicle  /opt/bin/gifsicle           /bin/gifsicle
-COPY --from=oxipng    /usr/local/cargo/bin/oxipng /bin/oxipng
+COPY --from=exiftool  /build/exiftool              /bin/exiftool
+COPY --from=exiv2     /build/exiv2/build/bin/exiv2 /bin/exiv2
+COPY --from=gifsicle  /opt/bin/gifsicle            /bin/gifsicle
+COPY --from=oxipng    /usr/local/cargo/bin/oxipng  /bin/oxipng
 
 RUN yum install -y  \
       ImageMagick \
@@ -77,6 +102,7 @@ RUN yum install -y  \
 USER mangadex
 RUN convert --version
 RUN exiftool -ver
+RUN exiv2 --version
 RUN identify --version
 RUN gifsicle --version
 RUN jpegtran -version

@@ -121,9 +121,11 @@ ENV PLAYWRIGHT_VERSION="${PLAYWRIGHT_VERSION}"
 
 USER root
 
-RUN yum update && \
-    yum install -y https://rpm.nodesource.com/pub_20.x/nodistro/repo/nodesource-release-nodistro-1.noarch.rpm && \
-    yum install nodejs -y --setopt=nodesource-nodejs.module_hotfixes=1 && \
+RUN curl -fsSL -o setup_node.sh https://rpm.nodesource.com/setup_20.x && \
+    chmod +x setup_node.sh && \
+    ./setup_node.sh && \
+    rm -v setup_node.sh && \
+    yum install nodejs -y && \
     npm install -g npm && \
     mkdir -pv "$PLAYWRIGHT_BROWSERS_PATH" && \
     npx --yes playwright@^${PLAYWRIGHT_VERSION} install chromium && \

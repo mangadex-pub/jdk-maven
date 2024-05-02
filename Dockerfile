@@ -1,4 +1,4 @@
-ARG JDK_VERSION="21"
+ARG JDK_VERSION="22"
 FROM docker.io/library/amazoncorretto:${JDK_VERSION}-al2023 as upstream
 
 USER root

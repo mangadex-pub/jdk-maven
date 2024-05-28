@@ -18,10 +18,10 @@ jobs:
 
     strategy:
       matrix:
-        jdk_version: [ 21, 22 ]
+        jdk_version: [ "21", "22" ]
 
     env:
-      PLAYWRIGHT_VERSION: "1.43"
+      PLAYWRIGHT_VERSION: "1.44"
 
     steps:
       - name: Checkout repository

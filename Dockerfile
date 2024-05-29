@@ -28,6 +28,30 @@ USER mangadex
 RUN java -version
 RUN mkdir "$HOME/.m2" && mvn -v
 
+FROM base as mozjpeg
+
+USER root
+WORKDIR /tmp
+
+RUN dnf groupinstall -y 'Development Tools' && \
+    dnf install -y \
+      cmake \
+      yasm
+
+ARG MOZJPEG_VERSION="v4.1.1"
+RUN curl -sfS -o mozjpeg.tar.gz https://codeload.github.com/mozilla/mozjpeg/tar.gz/${MOZJPEG_VERSION} && \
+    mkdir -v mozjpeg && \
+    tar -C mozjpeg --strip-components=1 -xf mozjpeg.tar.gz && \
+    rm mozjpeg.tar.gz
+
+WORKDIR /tmp/mozjpeg
+RUN mkdir build && \
+    pushd build && \
+    cmake -G 'Unix Makefiles' ../ -D CMAKE_BUILD_TYPE=Release -D ENABLE_SHARED=OFF -D ENABLE_STATIC=ON -D PNG_SUPPORTED=OFF -D REQUIRE_SIMD=ON && \
+    make -j$(nproc) && \
+    ./jpegtran-static -version && \
+    ldd ./jpegtran-static
+
 FROM base as magick
 
 USER root
@@ -35,7 +59,6 @@ RUN dnf install -y  \
       exiv2 \
       gifsicle \
       ImageMagick \
-      libjpeg-turbo-utils \
       oxipng \
       perl-Image-ExifTool && \
     dnf clean all && \
@@ -45,6 +68,8 @@ RUN dnf install -y  \
       /var/lib/apt/lists/* \
       /var/log/* \
       /var/tmp/*
+
+COPY --from=mozjpeg /tmp/mozjpeg/build/jpegtran-static /usr/local/bin/jpegtran
 
 USER mangadex
 WORKDIR /tmp

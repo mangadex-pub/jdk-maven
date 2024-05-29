@@ -57,8 +57,9 @@ FROM base as magick
 USER root
 RUN dnf install -y  \
       exiv2 \
+      fribidi \
       gifsicle \
-      ImageMagick \
+      libX11 \
       oxipng \
       perl-Image-ExifTool && \
     dnf clean all && \
@@ -68,6 +69,18 @@ RUN dnf install -y  \
       /var/lib/apt/lists/* \
       /var/log/* \
       /var/tmp/*
+
+RUN curl -sfSL -o magick.appimage https://github.com/ImageMagick/ImageMagick/releases/download/7.1.1-33/ImageMagick-057259c-gcc-x86_64.AppImage && \
+    chmod +x -v ./magick.appimage && \
+    ./magick.appimage --appimage-extract && \
+    rm -v magick.appimage && \
+    cp -rv squashfs-root/usr/bin/* /usr/bin/ && \
+    cp -rv squashfs-root/usr/etc/ImageMagick-7 /etc/ImageMagick-7 && \
+    cp -rv squashfs-root/usr/lib /usr/lib/imagemagick-7 && \
+    rm -rv squashfs-root && \
+    echo '/usr/lib/imagemagick-7' > /etc/ld.so.conf.d/99-imagemagick.conf && \
+    ldconfig && \
+    magick --version
 
 COPY --from=mozjpeg /tmp/mozjpeg/build/jpegtran-static /usr/local/bin/jpegtran
 

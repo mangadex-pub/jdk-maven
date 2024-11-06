@@ -1,4 +1,4 @@
-FROM ghcr.io/mangadex-pub/containers-base/rockylinux:9 as base
+FROM ghcr.io/mangadex-pub/containers-base/rockylinux:9 AS minimal
 
 ARG JDK_VERSION="22"
 ENV JDK_VERSION=${JDK_VERSION}
@@ -28,7 +28,7 @@ USER mangadex
 RUN java -version
 RUN mkdir "$HOME/.m2" && mvn -v
 
-FROM base as mozjpeg
+FROM minimal AS mozjpeg
 
 USER root
 WORKDIR /tmp
@@ -52,7 +52,7 @@ RUN mkdir build && \
     ./jpegtran-static -version && \
     ldd ./jpegtran-static
 
-FROM base as magick
+FROM minimal AS magick
 
 USER root
 RUN dnf install -y  \
@@ -96,7 +96,7 @@ RUN jpegtran -version
 RUN oxipng --version
 RUN fc-cache -rf
 
-FROM base as playwright
+FROM minimal AS playwright
 
 ARG PLAYWRIGHT_VERSION="1.44"
 ENV PLAYWRIGHT_VERSION="${PLAYWRIGHT_VERSION}"

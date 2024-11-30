@@ -65,3 +65,5 @@ jobs:
           target: ${{ inputs.MD_IMAGE_FLAVOUR }}
           build-args: |
             JDK_VERSION=${{ matrix.jdk_version }}
+          cache-from: type=local,src=${{ env.DOCKER_LAYER_CACHE }}
+          cache-to: type=local,dest=${{ env.DOCKER_LAYER_CACHE }}

@@ -1,6 +1,6 @@
 FROM ghcr.io/mangadex-pub/containers-base/rockylinux:9 AS minimal
 
-ARG JDK_VERSION="22"
+ARG JDK_VERSION="23"
 ENV JDK_VERSION=${JDK_VERSION}
 
 USER root

@@ -59,6 +59,7 @@ RUN dnf install -y  \
       exiv2 \
       fribidi \
       gifsicle \
+      jpeginfo \
       libX11 \
       oxipng \
       perl-Image-ExifTool && \

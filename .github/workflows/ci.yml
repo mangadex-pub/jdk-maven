@@ -1,0 +1,18 @@
+on:
+  push:
+    branches: [ "*" ]
+    tags: [ "*" ]
+  schedule:
+    - cron: "0 10 * * 1"
+  workflow_dispatch: { }
+
+jobs:
+  build-flavours:
+    strategy:
+      matrix:
+        FLAVOUR: [ "magick", "minimal", "playwright" ]
+
+    uses: "./.github/workflows/common.yml"
+    secrets: "inherit" # for Docker image publication
+    with:
+      MD_IMAGE_FLAVOUR: "${{ matrix.FLAVOUR }}"

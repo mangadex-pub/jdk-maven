@@ -1,13 +1,16 @@
+name: Build Docker image
+
 on:
-  push:
-    branches: [ "*" ]
-    tags: [ "*" ]
-  schedule:
-    - cron: "0 10 * * 1"
+  workflow_call:
+    inputs:
+      MD_IMAGE_FLAVOUR:
+        required: true
+        type: string
 
 env:
   REGISTRY: "ghcr.io"
   IMAGE_NAME: "${{ github.repository }}"
+  DOCKER_LAYER_CACHE: "/tmp/.buildx-cache"
 
 jobs:
   build-images:
@@ -18,15 +21,23 @@ jobs:
 
     strategy:
       matrix:
-        jdk_version: [ "21", "22", "23" ]
+        jdk_version: [ "22", "23" ]
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.DOCKER_LAYER_CACHE }}
+          key: ${{ runner.os }}-buildx-jdk${{ matrix.jdk_version }}-${{ inputs.MD_IMAGE_FLAVOUR }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-jdk${{ matrix.jdk_version }}-${{ inputs.MD_IMAGE_FLAVOUR }}-
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
@@ -39,9 +50,9 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=sha,event=push,enable=true,prefix=branch-{{ branch }}-${{ matrix.jdk_version }}-magick-git-,format=short
-            type=raw,event=push,enable={{ is_default_branch }},value={{ branch }}-${{ matrix.jdk_version }}-magick
-            type=raw,event=push,enable={{ is_default_branch }},value=${{ matrix.jdk_version }}-magick
+            type=sha,event=push,enable=true,prefix=branch-{{ branch }}-${{ matrix.jdk_version }}-${{ inputs.MD_IMAGE_FLAVOUR }}-git-,format=short
+            type=raw,event=push,enable={{ is_default_branch }},value={{ branch }}-${{ matrix.jdk_version }}-${{ inputs.MD_IMAGE_FLAVOUR }}
+            type=raw,event=push,enable={{ is_default_branch }},value=${{ matrix.jdk_version }}-${{ inputs.MD_IMAGE_FLAVOUR }}
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -51,6 +62,6 @@ jobs:
           provenance: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          target: magick
+          target: ${{ inputs.MD_IMAGE_FLAVOUR }}
           build-args: |
             JDK_VERSION=${{ matrix.jdk_version }}

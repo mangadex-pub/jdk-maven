@@ -70,7 +70,7 @@ RUN dnf install -y  \
       /var/log/* \
       /var/tmp/*
 
-RUN curl -sfSL -o magick.appimage https://github.com/ImageMagick/ImageMagick/releases/download/7.1.1-33/ImageMagick-057259c-gcc-x86_64.AppImage && \
+RUN curl -sfSL -o magick.appimage https://github.com/ImageMagick/ImageMagick/releases/download/7.1.1-41/ImageMagick-bbdcbf7-gcc-x86_64.AppImage && \
     chmod +x -v ./magick.appimage && \
     ./magick.appimage --appimage-extract && \
     rm -v magick.appimage && \

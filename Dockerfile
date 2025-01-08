@@ -5,7 +5,14 @@ ENV MD_OS_VERSION="9"
 ARG JDK_VERSION="23"
 ENV JDK_VERSION=${JDK_VERSION}
 
-FROM linux-base AS graal
+FROM ghcr.io/mangadex-pub/containers-base/rockylinux:9-devel AS linux-base-devel
+ENV MD_OS_FLAVOUR="RockyLinux"
+ENV MD_OS_VERSION="9+development-tools"
+
+ARG JDK_VERSION="23"
+ENV JDK_VERSION=${JDK_VERSION}
+
+FROM linux-base-devel AS graal
 USER root
 
 ENV JDK_INSTALLDIR="/opt/graalvm-${JDK_VERSION}"

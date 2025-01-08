@@ -126,7 +126,7 @@ FROM corretto AS playwright
 
 ARG PLAYWRIGHT_VERSION="1.44"
 ENV PLAYWRIGHT_VERSION="${PLAYWRIGHT_VERSION}"
-ENV PLAYWRIGHT_BROWSERS_PATH /ms-playwright
+ENV PLAYWRIGHT_BROWSERS_PATH="/ms-playwright"
 
 USER root
 RUN curl -fsSL -o setup_node.sh https://rpm.nodesource.com/setup_20.x && \

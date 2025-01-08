@@ -10,7 +10,7 @@ jobs:
   build-flavours:
     strategy:
       matrix:
-        FLAVOUR: [ "magick", "minimal", "playwright" ]
+        FLAVOUR: [ "corretto", "graal", "magick", "playwright" ]
 
     uses: "./.github/workflows/common.yml"
     secrets: "inherit" # for Docker image publication

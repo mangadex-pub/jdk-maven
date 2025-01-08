@@ -1,7 +1,32 @@
-FROM ghcr.io/mangadex-pub/containers-base/rockylinux:9 AS minimal
+FROM ghcr.io/mangadex-pub/containers-base/rockylinux:9 AS linux-base
+ENV MD_OS_FLAVOUR="RockyLinux"
+ENV MD_OS_VERSION="9"
 
 ARG JDK_VERSION="23"
 ENV JDK_VERSION=${JDK_VERSION}
+
+FROM linux-base AS graal
+USER root
+
+ENV JDK_INSTALLDIR="/opt/graalvm-${JDK_VERSION}"
+ENV PATH="${JDK_INSTALLDIR}/bin:$PATH"
+
+WORKDIR /tmp
+RUN curl -f "https://download.oracle.com/graalvm/${JDK_VERSION}/latest/graalvm-jdk-${JDK_VERSION}_linux-x64_bin.tar.gz" -o "jdk.tar.gz" && \
+    mkdir -pv "${JDK_INSTALLDIR}" && \
+    tar -C "${JDK_INSTALLDIR}" --strip-components=1 -xf "jdk.tar.gz" && \
+    rm -v "jdk.tar.gz"
+
+COPY install-maven.sh /tmp/install-maven.sh
+RUN chmod -v +x /tmp/install-maven.sh && \
+    /tmp/install-maven.sh && \
+    rm -v /tmp/install-maven.sh
+
+USER mangadex
+RUN java -version
+RUN mkdir "$HOME/.m2" && mvn -v
+
+FROM linux-base AS corretto
 
 USER root
 RUN rpm --import https://yum.corretto.aws/corretto.key && \
@@ -28,7 +53,7 @@ USER mangadex
 RUN java -version
 RUN mkdir "$HOME/.m2" && mvn -v
 
-FROM minimal AS mozjpeg
+FROM linux-base AS mozjpeg
 
 USER root
 WORKDIR /tmp
@@ -52,7 +77,7 @@ RUN mkdir build && \
     ./jpegtran-static -version && \
     ldd ./jpegtran-static
 
-FROM minimal AS magick
+FROM corretto AS magick
 
 USER root
 RUN dnf install -y  \
@@ -97,7 +122,7 @@ RUN jpegtran -version
 RUN oxipng --version
 RUN fc-cache -rf
 
-FROM minimal AS playwright
+FROM corretto AS playwright
 
 ARG PLAYWRIGHT_VERSION="1.44"
 ENV PLAYWRIGHT_VERSION="${PLAYWRIGHT_VERSION}"

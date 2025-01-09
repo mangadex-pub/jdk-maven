@@ -30,6 +30,7 @@ RUN chmod -v +x /tmp/install-maven.sh && \
     rm -v /tmp/install-maven.sh
 
 USER mangadex
+RUN node -v
 RUN java -version
 RUN mkdir "$HOME/.m2" && mvn -v
 
